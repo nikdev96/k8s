@@ -1,0 +1,7 @@
+# Скопируйте этот файл в terraform.tfvars и укажите ваш project_id
+project_id   = "your-gcp-project-id"
+region       = "us-central1"
+zone         = "us-central1-a"
+cluster_name = "netology-k8s-cluster"
+machine_type = "e2-small"
+node_count   = 1
