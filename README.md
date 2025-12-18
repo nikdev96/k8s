@@ -38,6 +38,13 @@ gcloud container clusters get-credentials netology-k8s-cluster --zone us-central
 - Работа с init-контейнерами
 - Создание Service для балансировки трафика
 
+### [1.4 - Сетевое взаимодействие в Kubernetes](1.4/)
+Настройка сетевого доступа к приложениям:
+- Настройка ClusterIP Service для внутреннего доступа
+- Настройка NodePort Service для внешнего доступа
+- Развертывание и настройка Ingress контроллера
+- Маршрутизация трафика через Ingress по путям
+
 ## Структура проекта
 
 ```
@@ -50,7 +57,10 @@ gcloud container clusters get-credentials netology-k8s-cluster --zone us-central
 ├── 1.2/                   # Домашнее задание 1.2
 │   ├── README.md
 │   └── manifests/
-└── 1.3/                   # Домашнее задание 1.3
+├── 1.3/                   # Домашнее задание 1.3
+│   ├── README.md
+│   └── manifests/
+└── 1.4/                   # Домашнее задание 1.4
     ├── README.md
     └── manifests/
 ```
