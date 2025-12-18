@@ -20,6 +20,7 @@ resource "google_container_cluster" "primary" {
   # Минимальная конфигурация для обучения
   remove_default_node_pool = true
   initial_node_count       = 1
+  deletion_protection      = false
 
   # Отключаем некоторые опции для удешевления
   network    = "default"
