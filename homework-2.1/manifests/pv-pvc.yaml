@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-homework
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /tmp/data
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-homework
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pv-deployment
+  labels:
+    app: pv-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pv-test
+  template:
+    metadata:
+      labels:
+        app: pv-test
+    spec:
+      containers:
+      - name: busybox
+        image: busybox:latest
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            echo "Starting busybox with PersistentVolume - writing data every 5 seconds"
+            while true; do
+              date >> /data/pv-data.txt
+              echo "PV Data written at $(date)" >> /data/pv-data.txt
+              sleep 5
+            done
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /data
+
+      - name: multitool
+        image: wbitt/network-multitool:latest
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            echo "Multitool container with PersistentVolume started"
+            while true; do
+              sleep 3600
+            done
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /data
+
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: pvc-homework

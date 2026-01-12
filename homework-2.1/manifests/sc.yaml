@@ -1,0 +1,89 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  hostPath:
+    path: /tmp/local-storage
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-local
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sc-deployment
+  labels:
+    app: sc-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sc-test
+  template:
+    metadata:
+      labels:
+        app: sc-test
+    spec:
+      containers:
+      - name: busybox
+        image: busybox:latest
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            echo "Starting busybox with StorageClass - writing data every 5 seconds"
+            while true; do
+              date >> /data/sc-data.txt
+              echo "SC Data written at $(date)" >> /data/sc-data.txt
+              sleep 5
+            done
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+
+      - name: multitool
+        image: wbitt/network-multitool:latest
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            echo "Multitool container with StorageClass started"
+            while true; do
+              sleep 3600
+            done
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: pvc-local
