@@ -1,5 +1,33 @@
 # Домашнее задание 2.1 - Kubernetes Storage
 
+## Ответ для преподавателя
+
+Добрый день!
+
+Выполнил все три задачи по работе с механизмами хранения в Kubernetes. Развернул GKE кластер на GCP (2 ноды e2-medium в us-central1-a), все манифесты протестированы и работают.
+
+**Что сделано:**
+1. Настроил обмен данными между контейнерами через emptyDir volume
+2. Реализовал работу с PersistentVolume и PVC, протестировал поведение Retain policy
+3. Создал StorageClass с no-provisioner и WaitForFirstConsumer
+
+**С какими трудностями столкнулся:**
+
+1. **Проблема с Compute Engine Service Account** - при создании GKE кластера через Terraform получал ошибку "failed to check status for compute@developer.gserviceaccount.com". Оказалось, что в новом GCP проекте default service account не создается автоматически. Решил через создание service identity командой `gcloud beta services identity create --service=compute.googleapis.com`, но в итоге пришлось использовать существующий service account от VM (serviceforbot) для создания кластера через gcloud CLI напрямую.
+
+2. **Read-only файловая система в GKE** - изначально использовал `/mnt/data` для hostPath в PersistentVolume, но получил ошибку "read-only file system". GKE использует Container-Optimized OS, где большинство директорий защищены от записи. Переключился на `/tmp/data` - единственную доступную для записи директорию на нодах.
+
+3. **Автоматическое создание динамических PV** - в первой попытке с PV+PVC, GKE автоматически создал свой PV вместо использования моего с hostPath. Проблема была в отсутствии `storageClassName: manual` - без явного указания StorageClass, Kubernetes использует default StorageClass (standard-rwo в GKE).
+
+**Что узнал нового:**
+- Разница между статусами PV: "Available", "Bound" и "Released". Особенно важно понимание статуса "Released" - после удаления PVC с Retain policy, PV сохраняет информацию о прошлой привязке и не может быть автоматически переиспользован.
+- Механизм WaitForFirstConsumer откладывает привязку PVC к PV до момента создания Pod, что критично для локального хранилища.
+- Retain policy действительно сохраняет данные на диске даже после удаления всех Kubernetes ресурсов - проверил через kubectl debug на ноде.
+
+Все результаты задокументированы в README с примерами команд и выводами. Манифесты находятся в директории `manifests/`.
+
+---
+
 ## Описание
 Практическое задание по работе с механизмами хранения данных в Kubernetes.
 Выполняется на GCP с использованием Terraform.
