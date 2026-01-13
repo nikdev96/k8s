@@ -1,0 +1,47 @@
+{{- if .Values.cache.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "myapp.fullname" . }}-cache
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+    component: cache
+spec:
+  serviceName: {{ include "myapp.fullname" . }}-cache
+  replicas: {{ .Values.replicaCount.cache }}
+  selector:
+    matchLabels:
+      {{- include "myapp.selectorLabels" . | nindent 6 }}
+      component: cache
+  template:
+    metadata:
+      labels:
+        {{- include "myapp.selectorLabels" . | nindent 8 }}
+        component: cache
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+      - name: redis
+        image: "{{ .Values.cache.image.repository }}:{{ .Values.cache.image.tag }}"
+        imagePullPolicy: {{ .Values.cache.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.cache.service.port }}
+          name: redis
+        resources:
+          {{- toYaml .Values.cache.resources | nindent 10 }}
+        {{- if .Values.cache.persistence.enabled }}
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        {{- end }}
+  {{- if .Values.cache.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.cache.persistence.size }}
+  {{- end }}
+{{- end }}

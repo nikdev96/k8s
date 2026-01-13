@@ -1,0 +1,19 @@
+{{- if .Values.cache.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "myapp.fullname" . }}-cache
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+    component: cache
+spec:
+  type: {{ .Values.cache.service.type }}
+  ports:
+  - port: {{ .Values.cache.service.port }}
+    targetPort: redis
+    protocol: TCP
+    name: redis
+  selector:
+    {{- include "myapp.selectorLabels" . | nindent 4 }}
+    component: cache
+{{- end }}

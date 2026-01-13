@@ -1,0 +1,42 @@
+environment: staging
+
+replicaCount:
+  database: 2
+  cache: 2
+  frontend: 3
+  backend: 5
+
+database:
+  resources:
+    requests:
+      memory: "3Gi"
+      cpu: "750m"
+    limits:
+      memory: "3Gi"
+      cpu: "750m"
+  persistence:
+    enabled: true
+
+cache:
+  resources:
+    requests:
+      memory: "3Gi"
+      cpu: "750m"
+    limits:
+      memory: "3Gi"
+      cpu: "750m"
+  persistence:
+    enabled: true
+
+frontend:
+  service:
+    type: LoadBalancer
+
+backend:
+  resources:
+    requests:
+      memory: "450Mi"
+      cpu: "750m"
+    limits:
+      memory: "650Mi"
+      cpu: "1250m"

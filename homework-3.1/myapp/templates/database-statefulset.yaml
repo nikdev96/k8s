@@ -1,0 +1,55 @@
+{{- if .Values.database.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "myapp.fullname" . }}-database
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+    component: database
+spec:
+  serviceName: {{ include "myapp.fullname" . }}-database
+  replicas: {{ .Values.replicaCount.database }}
+  selector:
+    matchLabels:
+      {{- include "myapp.selectorLabels" . | nindent 6 }}
+      component: database
+  template:
+    metadata:
+      labels:
+        {{- include "myapp.selectorLabels" . | nindent 8 }}
+        component: database
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+      - name: postgres
+        image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+        imagePullPolicy: {{ .Values.database.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.database.service.port }}
+          name: postgres
+        resources:
+          {{- toYaml .Values.database.resources | nindent 10 }}
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "changeme"
+        - name: POSTGRES_DB
+          value: "myapp"
+        - name: POSTGRES_USER
+          value: "myapp"
+        {{- if .Values.database.persistence.enabled }}
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+        {{- end }}
+  {{- if .Values.database.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.database.persistence.size }}
+  {{- end }}
+{{- end }}

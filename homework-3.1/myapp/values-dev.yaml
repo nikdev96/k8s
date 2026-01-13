@@ -1,0 +1,42 @@
+environment: dev
+
+replicaCount:
+  database: 1
+  cache: 1
+  frontend: 2
+  backend: 2
+
+database:
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "500m"
+  persistence:
+    enabled: false
+
+cache:
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "500m"
+  persistence:
+    enabled: false
+
+frontend:
+  service:
+    type: ClusterIP
+
+backend:
+  resources:
+    requests:
+      memory: "300Mi"
+      cpu: "500m"
+    limits:
+      memory: "500Mi"
+      cpu: "1000m"
