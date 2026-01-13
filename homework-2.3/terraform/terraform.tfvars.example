@@ -1,0 +1,9 @@
+# Пример файла с переменными
+# Скопируйте этот файл в terraform.tfvars и заполните своими значениями
+
+project_id   = "your-gcp-project-id"
+region       = "us-central1"
+zone         = "us-central1-a"
+cluster_name = "k8s-homework-2-3"
+node_count   = 2
+machine_type = "e2-medium"
