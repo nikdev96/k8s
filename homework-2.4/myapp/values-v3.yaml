@@ -1,0 +1,5 @@
+appVersion: "3.0"
+replicaCount: 1
+frontend:
+  image:
+    tag: "alpine"

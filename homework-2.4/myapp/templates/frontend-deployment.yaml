@@ -1,0 +1,32 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "myapp.fullname" . }}-frontend
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+    component: frontend
+    version: {{ .Values.appVersion | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "myapp.selectorLabels" . | nindent 6 }}
+      component: frontend
+  template:
+    metadata:
+      labels:
+        {{- include "myapp.selectorLabels" . | nindent 8 }}
+        component: frontend
+        version: {{ .Values.appVersion | quote }}
+    spec:
+      containers:
+      - name: nginx
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+{{- end }}

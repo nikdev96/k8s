@@ -1,0 +1,5 @@
+appVersion: "2.0"
+replicaCount: 1
+frontend:
+  image:
+    tag: "1.26"
