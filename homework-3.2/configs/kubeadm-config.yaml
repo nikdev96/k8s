@@ -1,0 +1,40 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: v1.28.0
+controlPlaneEndpoint: "10.0.0.100:8443"
+networking:
+  podSubnet: "192.168.0.0/16"
+  serviceSubnet: "10.96.0.0/12"
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+apiServer:
+  certSANs:
+  - "10.0.0.100"
+  - "MASTER1_IP"
+  - "MASTER2_IP"
+  - "MASTER3_IP"
+  extraArgs:
+    authorization-mode: "Node,RBAC"
+  timeoutForControlPlane: 4m0s
+controllerManager:
+  extraArgs:
+    bind-address: "0.0.0.0"
+scheduler:
+  extraArgs:
+    bind-address: "0.0.0.0"
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: "MASTER1_IP"
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
